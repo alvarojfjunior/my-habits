@@ -1,19 +1,44 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
+import Routes from './src/routes';
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+
+import DatabaseInit from './src/database/DatabaseInit';
+
+
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: 'tomato',
+    accent: 'yellow',
+  },
+};
 
 export default function App() {
+
+  useEffect(() => {
+    async function downloadFile() {
+      
+    }
+
+    downloadFile();
+
+
+
+    new DatabaseInit();
+  }, []);
+
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-    </View>
+    <PaperProvider theme={DefaultTheme} style={styles.container}>
+      <Routes />
+    </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-});
+})
