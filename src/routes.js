@@ -18,15 +18,18 @@ export default function Routes() {
             <Stack.Navigator
                 initialRouteName={logged ? 'Main' : 'Login'}>
                 <Stack.Screen
+                    options={{ headerShown: false }}
                     name="Main"
                     component={Main} />
                 <Stack.Screen
                     name="DetailHabit"
                     component={DetailHabit} />
                 <Stack.Screen
+                    options={{ headerShown: false }}
                     name="Login"
                     component={Login} />
                 <Stack.Screen
+                    options={{ headerShown: false }}
                     name="AddHabit"
                     component={AddHabit} />
             </Stack.Navigator>

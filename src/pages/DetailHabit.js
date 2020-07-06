@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { View, Text, Button } from 'react-native';
+import { StyleSheet ,View, Text, Button } from 'react-native';
 
 export default function DetailHabit({ navigation }) {
     return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={styles.container}>
             <Text>Detail Habit</Text>
             <Button
                 title="Go to Main"
@@ -12,3 +12,12 @@ export default function DetailHabit({ navigation }) {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#8aa0aa',
+        flex: 1,
+        alignItems: 'center', 
+        justifyContent: 'center'
+    }
+})

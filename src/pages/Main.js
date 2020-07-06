@@ -27,7 +27,7 @@ export default function Main({ navigation }) {
                     <Card key={habit.id} style={styles.cards}>
                         <Card.Title title={habit.title} subtitle={habit.description} />
                         <Card.Content>
-                            <ProgressBar progress={habit.progress} color={Colors.red800} />
+                            <ProgressBar progress={habit.progress} color="#fb685a" />
                         </Card.Content>
                     </Card>
                 ))}
@@ -39,10 +39,12 @@ export default function Main({ navigation }) {
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: '#8aa0aa',
         flex: 1,
     },
     cards: {
         margin: 5,
+        backgroundColor: '#f4f0d9',
     },
     buttonAddHabit: {
         alignSelf: "flex-end",

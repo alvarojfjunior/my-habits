@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "myHabits",
+    "name": "My Habits",
     "slug": "myHabits",
     "platforms": [
       "ios",
@@ -13,7 +13,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#8BA0AB"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -22,7 +22,13 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.myhabits",
+      "buildNumber": "1.0.0",
       "supportsTablet": true
+    },
+    "android": {
+      "package": "com.myhabits",
+      "versionCode": 1
     }
   }
 }

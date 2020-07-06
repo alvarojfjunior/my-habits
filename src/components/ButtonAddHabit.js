@@ -7,6 +7,7 @@ export default function ButtonDetailHabit({ navigation }) {
         <FAB
             style={styles.fab}
             icon="plus"
+            color="#f4f0d9"
             onPress={() => navigation.navigate('AddHabit') }
         />
     );
@@ -14,7 +15,7 @@ export default function ButtonDetailHabit({ navigation }) {
 
 const styles = StyleSheet.create({
     fab: {
-        backgroundColor: Colors.red800,
+        backgroundColor: '#fb685a',
         position: 'absolute',
         margin: 16,
         right: 0,
