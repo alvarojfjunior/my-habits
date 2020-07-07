@@ -30,7 +30,8 @@ export default function AddHabit({ navigation }) {
             'date': moment().format('DD/MM/YYYY HH:MM'),
         }
         const res = await HabitService.addData(newHabit);
-        setBtnAddIsLoading(false)
+        setBtnAddIsLoading(false);
+        navigation.navigate('Main');
     }
 
 

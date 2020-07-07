@@ -1,16 +1,25 @@
 import React from 'react';
-import { StyleSheet, View , Text} from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Headline } from 'react-native-paper';
 
 export default function Loading({ navigation }) {
     return (
         <View style={styles.container}>
-            <Text> Carregando ... </Text>
+            <ActivityIndicator 
+                animating={true} 
+                size="large" 
+                color="#f3c57b" />
+            <Headline style={styles.text}>Loading...</Headline>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: '#8aa0aa',
+    flex: 1,
+    flexDirection: "column",
+    alignItems: 'center',
+    justifyContent: 'center'
     },
-  })
+})

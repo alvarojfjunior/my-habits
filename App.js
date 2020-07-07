@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, StatusBar } from 'react-native';
+import { Provider } from 'react-redux';
 import Routes from './src/routes';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
+import store from './src/store';
 import DatabaseInit from './src/database/DatabaseInit';
 
 import Loading from './src/components/Loading';
@@ -15,7 +17,7 @@ const theme = {
     accent: '#fb685a',
     background: '#8aa0aa',
     surface: '#e8e4ce',
-    text: '#8aa0aa'
+    text: '#e8e4ce',
   },
 };
 
@@ -30,7 +32,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      new DatabaseInit(); 
+      new DatabaseInit();
       setIsReady(true);
     } catch (error) {
       console.log(error);
@@ -41,10 +43,14 @@ export default function App() {
     <Loading />
   )
   return (
-    <PaperProvider theme={theme} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#8aa0aa" />
-      <Routes />
-    </PaperProvider>
+
+    <Provider store={store}>
+      <PaperProvider theme={theme} style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#8aa0aa" />
+        <Routes />
+      </PaperProvider>
+    </Provider>
+
   );
 }
 
