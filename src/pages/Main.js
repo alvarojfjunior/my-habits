@@ -6,6 +6,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import moment from 'moment';
 
 import ButtonAddHabit from '../components/ButtonAddHabit';
+import DatabaseReset from '../database/DatabaseReset';
+import DatabaseInit from '../database/DatabaseInit';
 
 import HabitService from '../services/HabitService';
 import Loading from '../components/Loading';
@@ -30,22 +32,34 @@ function Main({ navigation, state }) {
         }, [])
     );
 
+
+    const databaseReset = async () => {
+        try {
+            await new DatabaseReset();
+            await new DatabaseInit();
+            navigation.navigate('SignUp');
+        } catch (error) {
+            error
+        }
+
+    }
+
     if (!isReady) return (<Loading />)
     else return (
         <View style={styles.container}>
-            <Title style={styles.title}> Hello {user.name} </Title>
+            <Title style={styles.title} onLongPress={() => databaseReset()}> Hello {user.name} </Title>
             <Caption style={styles.subTitle}>How are your habits going?</Caption>
             {habits[0] ?
                 <ScrollView>
                     {habits.map(habit => (
-                        <Card 
-                            key={habit.id} 
-                            style={styles.cards} 
-                            onPress={() => navigation.navigate('DetailHabit', {habit})}>
+                        <Card
+                            key={habit.id}
+                            style={styles.cards}
+                            onPress={() => navigation.navigate('DetailHabit', { habit })}>
                             <Card.Title
-                                 style={styles.fontCard}
-                                 title={habit.title} 
-                                 subtitle={habit.description} />
+                                style={styles.fontCard}
+                                title={habit.title}
+                                subtitle={habit.description} />
                             <Card.Content>
                                 <ProgressBar progress={habit.progress} color="#fb685a" />
                             </Card.Content>
