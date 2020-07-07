@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
-import { Text, Button, IconButton } from 'react-native-paper';
+import { Text, Button, IconButton, Title } from 'react-native-paper';
 import { connect } from 'react-redux';
 
 function Introduction({ navigation, state }) {
@@ -18,19 +18,19 @@ function Introduction({ navigation, state }) {
             return (
                 <Image
                     style={styles.image}
-                    source={require('../../assets/Icons/rocket.png')}
+                    source={require('../../assets/introduction/01.png')}
                 />)
         else if (cardPosition === 1)
             return (
                 <Image
                     style={styles.image}
-                    source={require('../../assets/Icons/rocket.png')}
+                    source={require('../../assets/introduction/02.png')}
                 />)
         else if (cardPosition === 2)
             return (
                 <Image
                     style={styles.image}
-                    source={require('../../assets/Icons/rocket.png')}
+                    source={require('../../assets/introduction/03.png')}
                 />)
         else {
             navigation.navigate('Main');
@@ -45,25 +45,25 @@ function Introduction({ navigation, state }) {
 
     return (
         <View style={styles.container}>
-            <Text>Introdution {state.user.user.name} </Text>
+            <Title> Welcome {user.name} </Title>
+            <GetCards />
             <View style={styles.arrowsContainer}>
                 <IconButton
-                    icon="camera"
+                    icon="chevron-left"
                     size={20}
                     onPress={() => setCardPosition(cardPosition - 1)}
                 />
+                <Button
+                    style={styles.skipButton}
+                    onPress={() => navigation.navigate('Main')}>
+                    Skip
+            </Button>
                 <IconButton
-                    icon="camera"
+                    icon="chevron-right"
                     size={20}
                     onPress={() => setCardPosition(cardPosition + 1)}
                 />
             </View>
-            <GetCards />
-            <Button
-                style={styles.skipButton}
-                onPress={() => navigation.navigate('Main')}>
-                Skip
-            </Button>
         </View>
     );
 }
@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
     },
     image: {
         marginBottom: 10,
-        width: 200,
-        height: 200
+        width: 300,
+        height: 350
     },
 })
 

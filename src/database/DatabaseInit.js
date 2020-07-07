@@ -9,13 +9,20 @@ export default class DatabaseInit {
     }
     InitDb() {
         var sql = [
-            `DROP TABLE if exists user;`,
-            `DROP TABLE if exists habit;`,
+            // `DROP TABLE if exists user;`,
+            // `DROP TABLE if exists habit;`,
             `create table if not exists habit (
                 id integer primary key autoincrement,
                 title text,
                 description text,
                 progress integer,
+                days integer,
+                mon blob,
+                tue blob,
+                wed blob,
+                thu blob,
+                sat blob,
+                sun blob
                 finished blob,
                 date text
             );`,

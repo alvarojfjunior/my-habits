@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Image, Text } from 'react-native';
+import { StyleSheet, View, Image, Text, TextInputMask } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 import { connect } from 'react-redux';
 import moment from 'moment';
@@ -14,6 +14,7 @@ function SignUp({ navigation, state, dispatch }) {
     const [user, setUser] = useState({});
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
+    const [repeatPassword, setRepeatPassword] = useState('');
     const [isReady, setIsReady] = useState(false);
     const [btnIsLoading, setBtnIsLoading] = useState(false);
 
@@ -38,7 +39,7 @@ function SignUp({ navigation, state, dispatch }) {
 
     const signUp = async () => {
         setBtnIsLoading(true)
-        if (name && password) {
+        if (name && password && password === repeatPassword) {
             const res = await UserService.addData({ name, password, 'email': '', 'date': moment().format('DD/MM/YYYY HH:MM') });
             setUser(res);
             dispatch(userActions.setUser(res));
@@ -55,25 +56,35 @@ function SignUp({ navigation, state, dispatch }) {
                 style={styles.image}
                 source={require('../../assets/Icons/rocket.png')} />
             <Text style={styles.title} > My Habit </Text>
-            <Text style={styles.subTittle} > Change you mind! {state.user.name}</Text>
+            <Text style={styles.subTittle} > Change you life with habits changes! {state.user.name}</Text>
 
             <View style={styles.formContainer}>
                 <TextInput
-                    label="Name"
+                    label="Yout name"
                     value={name}
+                    mode='outlined'
                     onChangeText={name => setName(name)}
                 />
                 <TextInput
                     label="Password"
                     value={password}
+                    secureTextEntry={true}
+                    mode='outlined'
                     onChangeText={password => setPassword(password)}
+                />
+                <TextInput
+                    label="Repeat password"
+                    value={repeatPassword}
+                    secureTextEntry={true}
+                    mode='outlined'
+                    onChangeText={repeatPassword => setRepeatPassword(repeatPassword)}
                 />
                 <Button
                     mode="contained"
                     loading={btnIsLoading}
                     style={styles.button}
                     onPress={() => signUp()}>
-                    Sign up
+                    Let's start
             </Button>
             </View>
 
@@ -92,11 +103,11 @@ const styles = StyleSheet.create({
     },
     image: {
         marginBottom: 10,
-        width: 200,
-        height: 200
+        width: 180,
+        height: 180
     },
     title: {
-        fontSize: 50,
+        fontSize: 45,
         color: '#f3c57b',
     },
     subTittle: {
