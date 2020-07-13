@@ -13,14 +13,16 @@ export default class DatabaseInit {
                 id integer primary key autoincrement,
                 title text,
                 description text,
+                monday blob,
+                tuesday blob,
+                wednesday blob,
+                thursday blob,
+                friday blob,
+                saturday blob,
+                sunday blob,
+                goaldays integer,
+                currentday integer,
                 progress integer,
-                days integer,
-                mon blob,
-                tue blob,
-                wed blob,
-                thu blob,
-                sat blob,
-                sun blob,
                 finished blob,
                 date text
             );`,
@@ -30,6 +32,15 @@ export default class DatabaseInit {
                 name text,
                 email text,
                 password text,
+                date text
+            );`,
+
+            `create table if not exists goal (
+                id integer primary key autoincrement,
+                habit integer,
+                title text,
+                description text,
+                currentprogress integer,
                 date text
             );`,
         ];

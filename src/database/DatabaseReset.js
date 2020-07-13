@@ -12,6 +12,7 @@ export default class DatabaseInit {
         var sql = [
             `DROP TABLE if exists user;`,
             `DROP TABLE if exists habit;`,
+            `DROP TABLE if exists goal;`,
         ];
         db.transaction(
             tx => {

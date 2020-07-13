@@ -6,12 +6,39 @@ const db = DatabaseConnection.getConnection()
 export default class HabitService {
 
     static addData(habit) {
-        console.log(habit)
         return new Promise((resolve, reject) => db.transaction(
             tx => {
-                tx.executeSql(`insert into ${table} (title, description, progress, finished, date) 
-                values (?,?,?,?,?)`,
-                    [habit.title, habit.description, habit.progress, habit.finished, habit.date],
+                tx.executeSql(`insert into ${table} (
+                    title,
+                    description,
+                    monday,
+                    tuesday,
+                    wednesday,
+                    thursday,
+                    friday,
+                    saturday,
+                    sunday,
+                    goaldays,
+                    currentday,
+                    progress, 
+                    finished, 
+                    date)
+                values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                    [
+                        habit.title,
+                        habit.description,
+                        habit.monday,
+                        habit.tuesday,
+                        habit.wednesday,
+                        habit.thursday,
+                        habit.friday,
+                        habit.saturday,
+                        habit.sunday,
+                        habit.goaldays,
+                        habit.currentday,
+                        habit.progress,
+                        habit.finished,
+                        habit.date],
                     (_, { insertId, rows }) => {
                         resolve(insertId)
                     }), (sqlError) => {
@@ -36,15 +63,63 @@ export default class HabitService {
     }
 
 
-    static updateById(param) {
+    static updateById(habit) {
         return new Promise((resolve, reject) => db.transaction(tx => {
-            tx.executeSql(`update ${table} set nome = ? where id = ?;`, [param.nome, param.id], () => {
+            tx.executeSql(`update ${table} set 
+                title = ?,
+                description = ?,
+                monday = ?,
+                tuesday = ?,
+                wednesday = ?,
+                thursday = ?,
+                friday = ?,
+                saturday = ?,
+                sunday = ?,
+                goaldays = ?,
+                currentday = ?,
+                progress = ?, 
+                finished = ?, 
+                date = ? 
+                where id = ?;`, [
+                    habit.title,
+                    habit.description,
+                    habit.monday,
+                    habit.tuesday,
+                    habit.wednesday,
+                    habit.thursday,
+                    habit.friday,
+                    habit.saturday,
+                    habit.sunday,
+                    habit.goaldays,
+                    habit.currentday,
+                    habit.progress,
+                    habit.finished,
+                    habit.date,
+                    habit.id
+                ], () => {
+                    resolve(habit.id)
             }), (sqlError) => {
                 console.log(sqlError);
             }
         }, (txError) => {
             console.log(txError);
+        }));
+    }
 
+    static updateNewGoal(habitId, newProgress) {
+        return new Promise((resolve, reject) => db.transaction(tx => {
+            tx.executeSql(`update ${table} set 
+                progress = ?
+                where id = ?;`, [
+                    newProgress,
+                    habitId
+                ], () => {
+                    resolve(habitId)
+            }), (sqlError) => {
+                console.log(sqlError);
+            }
+        }, (txError) => {
+            console.log(txError);
         }));
     }
 
