@@ -23,12 +23,16 @@
     ],
     "ios": {
       "bundleIdentifier": "com.myhabits",
-      "buildNumber": "1.0.0",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8648602875009663/1238512243"
+      }
     },
     "android": {
       "package": "com.myhabits",
-      "versionCode": 1
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8648602875009663~6078763628"
+      }
     }
   }
 }

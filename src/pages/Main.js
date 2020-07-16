@@ -34,28 +34,6 @@ function Main({ navigation, state }) {
         }, [])
     );
 
-
-    const getNews = async () => {
-        try {
-            let article = {};
-            let titles = []
-            habits.map(habit => {
-                titles.push(habit.title.replace(/\s+/g, '-').toLowerCase())
-            });
-            titles.map(async title => {
-                const res = await fetch('https://newsapi.org/v2/everything?q=' + title + '&apiKey=a94f7b12c3e84bca850998740b5cca9f');
-                let data = await res.json();
-                if (data.articles.length > 0) {
-                    setNotice(data.articles[0]);
-                    setShowNews(true);
-                    return
-                }
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     const databaseReset = async () => {
         try {
             await new DatabaseReset();
@@ -102,7 +80,7 @@ function Main({ navigation, state }) {
                         <Card
                             key={habit.id}
                             style={styles.cards}
-                            onPress={() => navigation.navigate('DetailHabit', { habit })}>
+                            onPress={() => navigation.navigate('DetailHabit', habit)}>
                             <Card.Title
                                 style={styles.fontCard}
                                 title={habit.title}

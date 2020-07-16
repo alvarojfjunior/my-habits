@@ -19,19 +19,18 @@ function DetailHabit({ state, navigation, route }) {
 
     useFocusEffect(
         useCallback(() => {
-            const loadAll = async habitId => {
-                setHabit({ ...route.params.habit, 'initials': route.params.habit.title.substring(0, 2) })
-                setUser(state.user.user);
-
+            const loadAll = async () => {
+                const newHabit = await {...route.params, 'initials': route.params.title.substring(0, 2)}
+                const newUser = await state.user.user 
+                setHabit(newHabit)
+                setUser(newUser);
                 //load Goals
-                const res = await GoalService.findByHabit(route.params.habit.id);
+                const res = await GoalService.findByHabit(newHabit.id);
                 setGoals(res._array);
                 setIsReady(true);
             }
-            loadAll(habit.id);
-
-        }, [])
-    );
+            loadAll();
+        }, []));
 
 
     const handleEdit = () => {
@@ -42,6 +41,32 @@ function DetailHabit({ state, navigation, route }) {
     const handleDelete = async () => {
         const res = await HabitService.deleteById(habit.id);
         navigation.goBack();
+    }
+
+
+    const GetWekDaysToShow = (habit) => {
+        var res = '';
+
+        if (habit.goaldays === 0)
+            res = res + habit.currentday + ' days of practice'
+        else
+            res = res + habit.currentday + ' to ' + habit.goaldays + ' days ( ';
+            
+        if (habit.monday)
+            res = res + 'Mon. '
+        if (habit.tuesday)
+            res = res + 'Tue. '
+        if (habit.wednesday)
+            res = res + 'Wed. '
+        if (habit.thursday)
+            res = res + 'Thu. '
+        if (habit.friday)
+            res = res + 'Fri. '
+        if (habit.saturday)
+            res = res + 'Sat. '
+        if (habit.sunday)
+            res = res + 'Sun. '
+        return res + ')';
     }
 
 
@@ -62,12 +87,10 @@ function DetailHabit({ state, navigation, route }) {
                     left={(props) => <Avatar.Text size={50} label={habit.initials} />}
                     right={(props) => <IconButton {...props} icon="dialpad" color='#f3c57b' onPress={() => { setOptionsVisible(true) }} />} />
                 <Card.Content>
-                    <Paragraph style={styles.litleText}>Stay focused on your goals!</Paragraph>
+                    <Paragraph style={styles.daysText}> {GetWekDaysToShow(habit)} </Paragraph>
                 </Card.Content>
             </Card>
             <Title style={styles.titleGoals}> Your goals: </Title>
-
-
 
 
             <ScrollView style={styles.scroll}>
@@ -123,9 +146,9 @@ function DetailHabit({ state, navigation, route }) {
                         </Paragraph>
                         <Dialog.Actions>
                             <Button onPress={() => handleDelete()}>Yes</Button>
-                            <Button 
+                            <Button
                                 style={styles.buttonDontDelete}
-                                labelStyle={{color: '#fff'}}
+                                labelStyle={{ color: '#fff' }}
                                 onPress={() => setDeleteVisible(false)}>No!</Button>
                         </Dialog.Actions>
 
@@ -146,18 +169,20 @@ const styles = StyleSheet.create({
     },
     title: {
         textAlign: 'center',
-        color: 'rgba(0, 0, 0, 0.7)',
+        color: '#f3c57b',
     },
     titleGoals: {
         marginTop: 30,
         textAlign: 'center',
-        color: 'rgba(0, 0, 0, 0.7)',
+        color: '#f3c57b',
+        //color: 'rgba(0, 0, 0, 0.9)',
     },
     cardHabit: {
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
-    litleText: {
-        color: '#f3c57b'
+    daysText: {
+        textAlign: 'center',
+        color: '#fb685a'
     },
     cardGoasHeader: {
         backgroundColor: '#8aa0aa',

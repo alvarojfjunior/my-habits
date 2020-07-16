@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import Loading from '../components/Loading';
 import { StyleSheet, View, Image, ScrollView } from 'react-native';
 import { IconButton, TextInput, Title, Button, Checkbox, Caption, Dialog, Text, RadioButton, Headline, Portal } from 'react-native-paper';
 import { connect } from 'react-redux';
+import { Notifications } from 'expo';
 import moment from 'moment';
+import { AdMobInterstitial } from 'expo-ads-admob';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import GoalService from '../services/GoalService';
 import HabitService from '../services/HabitService';
+import { useFocusEffect } from '@react-navigation/native';
 
 function AddHabit({ navigation, route, state }) {
+    const [isReady, setIsReady] = useState(false)
     const [user, setUser] = useState({})
     const [habit, setHabit] = useState({})
     const [firstGoal, setFirstGoal] = useState({});
@@ -16,7 +22,9 @@ function AddHabit({ navigation, route, state }) {
     const [description, setDescription] = useState('');
 
     const [modalVisible, setModalVisible] = useState(false);
+    const [showTimePicker, setShowTimePicker] = useState(false);
 
+    const [intersticialAdId, setIntersticialAdId] = useState('')
     const [monday, setMonday] = useState(true);
     const [tuesday, setTuesday] = useState(true);
     const [wednesday, setWednesday] = useState(true);
@@ -25,45 +33,52 @@ function AddHabit({ navigation, route, state }) {
     const [saturday, setSaturday] = useState(false);
     const [sunday, setSunday] = useState(false);
     const [goaldays, setGoaldays] = useState('0');
+    const [timeToRemaind, setTimeToRemaind] = useState(new Date());
 
 
-    useEffect(() => {
-        setUser(state.user.user)
-        if (route.params) {
-            setHabit(route.params)
-            setTitle(habit.title)
-            setDescription(habit.description);
-            setMonday(habit.monday === '1' ? true : false)
-            setTuesday(habit.tuesday === '1' ? true : false)
-            setWednesday(habit.wednesday === '1' ? true : false)
-            setThursday(habit.thursday === '1' ? true : false)
-            setFriday(habit.friday === '1' ? true : false)
-            setSaturday(habit.saturday === '1' ? true : false)
-            setSunday(habit.sunday === '1' ? true : false)
-            setGoaldays('' + habit.goaldays + '')
-        }
-    }, []);
 
+
+    useFocusEffect(
+        useCallback(() => {
+            setIntersticialAdId(Platform.OS === 'ios' ? 'ca-app-pub-8648602875009663/9055732019' : 'ca-app-pub-8648602875009663/1238512243')
+            const newUser = state.user.user;
+            const newHabit = route.params;
+            setUser(newUser)
+            if (newHabit) {
+                setHabit(newHabit)
+                setTitle(newHabit.title)
+                setDescription(newHabit.description);
+                setMonday(newHabit.monday === '1' ? true : false)
+                setTuesday(newHabit.tuesday === '1' ? true : false)
+                setWednesday(newHabit.wednesday === '1' ? true : false)
+                setThursday(newHabit.thursday === '1' ? true : false)
+                setFriday(newHabit.friday === '1' ? true : false)
+                setSaturday(newHabit.saturday === '1' ? true : false)
+                setSunday(newHabit.sunday === '1' ? true : false)
+                setGoaldays('' + newHabit.goaldays + '')
+            }
+            setIsReady(true)
+        }, []));
 
     const addFirstGoal = async () => {
         const newFirstGoal = {
             'habit': habit.id,
             'title': 'First step',
             'description': 'You are now ready to start practicing a new habit.',
-            'currentprogress': habit.progress+0.1,
+            'currentprogress': habit.progress + 0.1,
             'date': moment().format('DD/MM/YYYY HH:MM')
         }
         const resAddData = await GoalService.addData(newFirstGoal);
-        const resAddGoal = await HabitService.updateNewGoal(habit.id, habit.progress+0.1);
+        const resAddGoal = await HabitService.updateNewGoal(habit.id, habit.progress + 0.1);
         setFirstGoal({ ...newFirstGoal, 'id': resAddData })
     }
 
 
-    const addNewHabit = async () => {
+    const handleBtnSubmit = async () => {
         if (title === '' || description === '')
             return;
         setBtnAddIsLoading(true)
-        const newHabit = {
+        let newHabit = {
             title,
             description,
             monday,
@@ -73,27 +88,71 @@ function AddHabit({ navigation, route, state }) {
             friday,
             saturday,
             sunday,
+            timeToRemaind,
             'goaldays': parseInt(goaldays),
             'currentday': 0,
             'progress': 0,
             'finished': false,
             'date': moment().format('DD/MM/YYYY HH:MM'),
         }
-        //Editando
+        //EDITING
         if (route.params) {
-            const res = await HabitService.updateById({'id': route.params.id,  ...newHabit});
-            console.log(res);
-            navigation.goBack();
-        } 
-
-        //Cadastrando
+            newHabit = { 'id': route.params.id, ...newHabit };
+            const res = await HabitService.updateById(newHabit);
+            navigation.push('DetailHabit', newHabit);
+        }
+        //NEW
         else {
             const res = await HabitService.addData(newHabit);
             setHabit({ 'id': res, ...newHabit })
             setModalVisible(true);
         }
+        await generateRemainders();
+
+        AdMobInterstitial.setAdUnitID(intersticialAdId);
+        await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: false })
+        await AdMobInterstitial.showAdAsync();
         setBtnAddIsLoading(false);
     }
+
+    const onChangeTimePicker = (event, selectedDate) => {
+        const currentDate = selectedDate || timeToRemaind;
+        setShowTimePicker(Platform.OS === 'ios');
+        setTimeToRemaind(currentDate);
+    }
+
+
+
+    const generateRemainders = async () => {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        const schedulingOptions = {
+            time: (new Date(timeToRemaind)).getTime(),
+            repeat: 'day'
+        }
+        const localNotification = {
+            title: 'done',
+            body: 'done!',
+            ios: {
+                sound: true,
+                _displayInForeground: true,
+                image: 'https://github.com/alvarojfjunior/MyHabits/raw/master/assets/icon.png',
+            },
+            android: {
+                sound: true,
+                icon: 'https://github.com/alvarojfjunior/MyHabits/raw/master/assets/icon.png',
+                channelId: 'chat-messages',
+            },
+        };
+        Notifications.scheduleLocalNotificationAsync(localNotification, schedulingOptions);
+    }
+
+
+    function getMsFromDate(time) {
+        var hours = new Date(time).getHours();
+        return hours * 60 * 60 *1000;
+    }
+
+    if (!isReady) return <Loading />
     return (
         <ScrollView style={styles.container}>
             <IconButton
@@ -175,16 +234,38 @@ function AddHabit({ navigation, route, state }) {
                         </View>
                     </RadioButton.Group>
                 </View>
+
+                <View >
+                    <Button mode="contained" onPress={() => setShowTimePicker(true)}>
+                        Set a time to reminders
+                    </Button>
+                </View>
+                {showTimePicker ? (
+                    <DateTimePicker
+                        testID="dateTimePicker"
+                        value={timeToRemaind}
+                        mode="time"
+                        is24Hour={true}
+                        display="default"
+                        textColor="red"
+                        style={styles.timePiker}
+                        onChange={(event, selectedDate) => {
+                            const currentDate = selectedDate || date;
+                            setShowTimePicker(Platform.OS === 'ios');
+                            setTimeToRemaind(currentDate)
+                        }}
+                    />
+                ) : <View></View>}
+
                 <Button
                     mode="contained"
                     style={styles.btnAdd}
                     loading={btnAddIsLoading}
-                    onPress={() => addNewHabit()}>
-                    Add Habit
+                    onPress={() => handleBtnSubmit()}>
+                    I'm ready!
                 </Button>
             </View>
             <Portal>
-
                 <Dialog
                     visible={modalVisible}
                     onDismiss={async () => {
@@ -224,6 +305,9 @@ const styles = StyleSheet.create({
     textFields: {
         marginBottom: 10,
         borderRadius: 10,
+    },
+    timePiker: {
+        color: '#f3c57b'
     },
     btnAdd: {
         marginTop: 15,
