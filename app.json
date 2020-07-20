@@ -22,7 +22,6 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "com.myhabits",
       "supportsTablet": true,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-8648602875009663/1238512243"

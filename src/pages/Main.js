@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { Card, ProgressBar, Title, Text, Caption, FAB, Portal, Dialog, Paragraph, Avatar } from 'react-native-paper';
+import { Card, ProgressBar, Title, Caption, FAB, Portal, Dialog, Paragraph, Avatar } from 'react-native-paper';
 import { StyleSheet, View, ScrollView, Image } from 'react-native';
 import { connect } from 'react-redux';
+import { Notifications } from 'expo';
 import { useFocusEffect } from '@react-navigation/native';
 import moment from 'moment';
 
@@ -36,6 +37,7 @@ function Main({ navigation, state }) {
 
     const databaseReset = async () => {
         try {
+            await Notifications.cancelAllScheduledNotificationsAsync();
             await new DatabaseReset();
             await new DatabaseInit();
             navigation.navigate('SignUp');

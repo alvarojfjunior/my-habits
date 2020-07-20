@@ -16,10 +16,13 @@ export default function Loading({ navigation }) {
 
 const styles = StyleSheet.create({
     container: {
-    backgroundColor: '#8aa0aa',
-    flex: 1,
-    flexDirection: "column",
-    alignItems: 'center',
-    justifyContent: 'center'
+        backgroundColor: '#8aa0aa',
+        flex: 1,
+        flexDirection: "column",
+        alignItems: 'center',
+        justifyContent: 'center'
     },
+    text: {
+        color: '#fff'
+    }
 })

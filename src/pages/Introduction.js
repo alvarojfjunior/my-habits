@@ -3,13 +3,20 @@ import { StyleSheet, View, Image } from 'react-native';
 import { Text, Button, IconButton, Title } from 'react-native-paper';
 import { connect } from 'react-redux';
 
-function Introduction({ navigation, state }) {
+import Loading from '../components/Loading';
 
+function Introduction({ navigation, state }) {
+    const [showThis, setShowThis] = useState(false);
+    const [isReady, setIsReady] = useState(false);
     const [cardPosition, setCardPosition] = useState(0);
     const [user, setUser] = useState({})
 
     useEffect(() => {
+        console.log(navigation.canGoBack(false))
+        if (showThis === false)
+            navigation.push('Main')
         setUser(state.user.user)
+        setIsReady(true)
     }, []);
 
 
@@ -42,8 +49,8 @@ function Introduction({ navigation, state }) {
         }
     }
 
-
-    return (
+    if (!isReady) return (<Loading />)
+    else return (
         <View style={styles.container}>
             <Title> Welcome {user.name} </Title>
             <GetCards />

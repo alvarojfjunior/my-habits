@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Vibration, StyleSheet, StatusBar, Platform } from 'react-native';
+import { YellowBox, Vibration, StyleSheet, StatusBar, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import Routes from './src/routes';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
-import { AdMobBanner } from 'expo-ads-admob';
+import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 
 import store from './src/store';
 import DatabaseInit from './src/database/DatabaseInit';
 
 import Loading from './src/components/Loading';
+
+
+YellowBox.ignoreWarnings([
+  'Provided value for "time" is before the current date.',
+]);
 
 const theme = {
   ...DefaultTheme,
@@ -31,8 +36,6 @@ const theme = {
 
 //Ios banner: ca-app-pub-8648602875009663/1760422273
 //Ios intersticial: ca-app-pub-8648602875009663/9055732019
-
-
 
 // CORES //
 //CREME:    #f4f0d9   #e8e4ce
@@ -53,7 +56,6 @@ export default function App() {
       setBannerAdId(Platform.OS === 'ios' ? 'ca-app-pub-8648602875009663/1760422273' : 'ca-app-pub-8648602875009663/9438875398')
       await getPushNotificationPermissions();
       const _notificationSubscription = await Notifications.addListener(_handleNotification);
-      console.log(_notificationSubscription)
       new DatabaseInit();
       setIsReady(true);
     }
@@ -104,7 +106,9 @@ export default function App() {
       <AdMobBanner
         bannerSize="banner"
         adUnitID={bannerAdId}
-        servePersonalizedAds={false} />
+        setTestDeviceIDAsync={true}
+        servePersonalizedAds={true} 
+        onDidFailToReceiveAdWithError ={(err) => console.log(err)}/>
     </Provider>
 
   );
