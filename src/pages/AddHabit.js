@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import Loading from '../components/Loading';
-import { StyleSheet, View, Image, ScrollView } from 'react-native';
+import { YellowBox ,StyleSheet, View, Image, ScrollView } from 'react-native';
 import { IconButton, TextInput, Title, Button, Checkbox, Caption, Dialog, Text, RadioButton, Headline, Portal } from 'react-native-paper';
 import { connect } from 'react-redux';
 import { Notifications } from 'expo';
 import moment, { now } from 'moment';
-import { AdMobInterstitial } from 'expo-ads-admob';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import GoalService from '../services/GoalService';
 import HabitService from '../services/HabitService';
 import { useFocusEffect } from '@react-navigation/native';
+
+YellowBox.ignoreWarnings([
+    'Provided value for "time"'
+])
 
 function AddHabit({ navigation, route, state }) {
     const [isReady, setIsReady] = useState(false)
@@ -34,14 +37,15 @@ function AddHabit({ navigation, route, state }) {
     const [sunday, setSunday] = useState(false);
     const [goaldays, setGoaldays] = useState('0');
     const [timeToRemaind, setTimeToRemaind] = useState(new Date());
+    const [timeRepeat, setTimeRepeat] = useState('day')
 
 
     useFocusEffect(
         useCallback(() => {
-            setAd()
             const newUser = state.user.user;
             const newHabit = route.params;
             setUser(newUser)
+
             if (newHabit) {
                 setHabit(newHabit)
                 setTitle(newHabit.title)
@@ -54,24 +58,10 @@ function AddHabit({ navigation, route, state }) {
                 setSaturday(newHabit.saturday === '1' ? true : false)
                 setSunday(newHabit.sunday === '1' ? true : false)
                 setGoaldays('' + newHabit.goaldays + '')
-            } else {
-                setTimeToRemaind(new now())
+                setTimeRepeat(newHabit.timeRepeat)
             }
             setIsReady(true)
         }, []));
-
-
-    async function setAd() {
-        const newIntersticialAdId = Platform.OS === 'ios' ? 'ca-app-pub-8648602875009663/9055732019' : 'ca-app-pub-8648602875009663/1238512243';  
-        setIntersticialAdId(newIntersticialAdId)
-        console.log(newIntersticialAdId)
-        await AdMobInterstitial.setAdUnitID(newIntersticialAdId);
-    }
-
-    const loadAd = async () => {
-        await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true })
-        await AdMobInterstitial.showAdAsync();
-    }
 
     const addFirstGoal = async () => {
         const newFirstGoal = {
@@ -91,7 +81,7 @@ function AddHabit({ navigation, route, state }) {
         if (title === '' || description === '')
             return;
         setBtnAddIsLoading(true)
-        var newHabit = {
+        let newHabit = {
             title,
             description,
             monday,
@@ -102,6 +92,7 @@ function AddHabit({ navigation, route, state }) {
             saturday,
             sunday,
             timeToRemaind,
+            timeRepeat,
             'goaldays': parseInt(goaldays),
             'currentday': 0,
             'progress': 0,
@@ -111,8 +102,7 @@ function AddHabit({ navigation, route, state }) {
         //EDITING
         if (route.params) {
             newHabit = { 'id': route.params.id, ...newHabit };
-            console.log(newHabit)
-            const res = await HabitService.updateById(newHabit);
+            await HabitService.updateById(newHabit);
             navigation.push('DetailHabit', newHabit);
         }
         //NEW
@@ -121,18 +111,15 @@ function AddHabit({ navigation, route, state }) {
             setHabit({ 'id': res, ...newHabit })
             setModalVisible(true);
         }
-        await generateRemainder();
-
-
-        loadAd()
+        await generateRemainders();
         setBtnAddIsLoading(false);
     }
 
-    const generateRemainder = async () => {
+    const generateRemainders = async () => {
         await Notifications.cancelAllScheduledNotificationsAsync();
         const schedulingOptions = {
-            time: (new Date(timeToRemaind)).getTime(),
-            repeat: 'day'
+            time: timeToRemaind,
+            repeat: timeRepeat
         }
         const localNotification = {
             title: 'done',
@@ -240,12 +227,9 @@ function AddHabit({ navigation, route, state }) {
                 </View>
                 {showTimePicker ? (
                     <DateTimePicker
-                        testID="dateTimePicker"
                         value={timeToRemaind}
                         mode="time"
                         is24Hour={true}
-                        display="default"
-                        textColor="red"
                         style={styles.timePiker}
                         onChange={(event, selectedDate) => {
                             const currentDate = selectedDate || date;
@@ -254,6 +238,24 @@ function AddHabit({ navigation, route, state }) {
                         }}
                     />
                 ) : <View></View>}
+
+                <Caption style={styles.label}>Repeat</Caption>
+                <View style={styles.boxGroup} >
+                    <RadioButton.Group onValueChange={timeRepeat => setTimeRepeat(timeRepeat)} value={timeRepeat}>
+                        <View>
+                            <Text>minute</Text>
+                            <RadioButton value="minute" />
+                        </View>
+                        <View>
+                            <Text>Hour</Text>
+                            <RadioButton value="hour" />
+                        </View>
+                        <View>
+                            <Text>Day</Text>
+                            <RadioButton value="day" />
+                        </View>
+                    </RadioButton.Group>
+                </View>
 
                 <Button
                     mode="contained"

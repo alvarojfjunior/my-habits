@@ -6,18 +6,12 @@ import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import Constants from 'expo-constants';
-import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 
 import store from './src/store';
 import DatabaseInit from './src/database/DatabaseInit';
 
 import Loading from './src/components/Loading';
-
-
-YellowBox.ignoreWarnings([
-  'Provided value for "time" is before the current date.',
-]);
 
 const theme = {
   ...DefaultTheme,
@@ -31,11 +25,6 @@ const theme = {
   },
 };
 
-//Android banner: ca-app-pub-8648602875009663/9438875398
-//Android intersticial: ca-app-pub-8648602875009663/1238512243
-
-//Ios banner: ca-app-pub-8648602875009663/1760422273
-//Ios intersticial: ca-app-pub-8648602875009663/9055732019
 
 // CORES //
 //CREME:    #f4f0d9   #e8e4ce
@@ -53,14 +42,28 @@ export default function App() {
 
   useEffect(() => {
     const initApp = async () => {
-      setBannerAdId(Platform.OS === 'ios' ? 'ca-app-pub-8648602875009663/1760422273' : 'ca-app-pub-8648602875009663/9438875398')
+      
+      //set Ads
+      await setAd()
+      
+      //set push-notifications
       await getPushNotificationPermissions();
       const _notificationSubscription = await Notifications.addListener(_handleNotification);
+     
+      //set database
       new DatabaseInit();
       setIsReady(true);
     }
     initApp();
   }, []);
+
+
+  const setAd = async () => {
+    
+
+
+  }
+
 
   const getPushNotificationPermissions = async () => {
     if (Constants.isDevice) {
@@ -103,12 +106,6 @@ export default function App() {
         <StatusBar barStyle="light-content" backgroundColor="#8aa0aa" />
         <Routes />
       </PaperProvider>
-      <AdMobBanner
-        bannerSize="banner"
-        adUnitID={bannerAdId}
-        setTestDeviceIDAsync={true}
-        servePersonalizedAds={true} 
-        onDidFailToReceiveAdWithError ={(err) => console.log(err)}/>
     </Provider>
 
   );

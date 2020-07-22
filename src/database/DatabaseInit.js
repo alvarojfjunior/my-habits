@@ -24,7 +24,8 @@ export default class DatabaseInit {
                 currentday integer,
                 progress integer,
                 finished blob,
-                timeToRemaind string,
+                timetoremaind string,
+                timerepeat string,
                 date text
             );`,
 
