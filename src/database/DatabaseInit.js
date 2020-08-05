@@ -5,7 +5,11 @@ var db = null
 export default class DatabaseInit {
     constructor() {
         db = DatabaseConnection.getConnection()
-        this.InitDb()
+        try {
+            this.InitDb()    
+        } catch (error) {
+            alert(error)
+        }
     }
     InitDb() {
         var sql = [
@@ -13,20 +17,20 @@ export default class DatabaseInit {
                 id integer primary key autoincrement,
                 title text,
                 description text,
-                monday blob,
-                tuesday blob,
-                wednesday blob,
-                thursday blob,
-                friday blob,
-                saturday blob,
-                sunday blob,
+                monday integer,
+                tuesday integer,
+                wednesday integer,
+                thursday integer,
+                friday integer,
+                saturday integer,
+                sunday integer,
                 goaldays integer,
                 currentday integer,
                 progress integer,
-                finished blob,
-                timetoremaind string,
-                timerepeat string,
-                date text
+                repeat text,
+                timetoremaind datetime,
+                date datetime,
+                notificationidentifier text
             );`,
 
             `create table if not exists user (
@@ -34,7 +38,7 @@ export default class DatabaseInit {
                 name text,
                 email text,
                 password text,
-                date text
+                date datetime
             );`,
 
             `create table if not exists goal (
@@ -43,7 +47,7 @@ export default class DatabaseInit {
                 title text,
                 description text,
                 currentprogress integer,
-                date text
+                date datetime
             );`,
         ];
         db.transaction(

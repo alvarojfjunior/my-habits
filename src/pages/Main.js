@@ -24,16 +24,16 @@ function Main({ navigation, state }) {
 
     useFocusEffect(
         useCallback(() => {
-            const getAllHabits = async () => {
-                const response = await HabitService.findAll();
-                setHabits(response._array);
-                setUser(state.user.user)
-                setIsReady(true);
-            }
-
             getAllHabits();
         }, [])
     );
+
+    const getAllHabits = async () => {
+        const response = await HabitService.findAll()
+        setHabits(response._array)
+        setUser(state.user.user)
+        setIsReady(true);
+    }
 
     const databaseReset = async () => {
         try {
@@ -50,23 +50,23 @@ function Main({ navigation, state }) {
         var res = '';
 
         if (habit.goaldays === 0)
-            res = res + habit.currentday + ' days of practice'
+            res = res + habit.currentday + ' days of practice '
         else
             res = res + habit.currentday + ' to ' + habit.goaldays + ' days - ';
 
-        if (habit.monday === '1')
+        if (habit.monday === 1)
             res = res + 'Mon. '
-        if (habit.tuesday === '1')
+        if (habit.tuesday === 1)
             res = res + 'Tue. '
-        if (habit.wednesday === '1')
+        if (habit.wednesday === 1)
             res = res + 'Wed. '
-        if (habit.thursday === '1')
+        if (habit.thursday === 1)
             res = res + 'Thu. '
-        if (habit.friday === '1')
+        if (habit.friday === 1)
             res = res + 'Fri. '
-        if (habit.saturday === '1')
+        if (habit.saturday === 1)
             res = res + 'Sat. '
-        if (habit.sunday === '1')
+        if (habit.sunday === 1)
             res = res + 'Sun. '
         return res;
     }
@@ -86,8 +86,8 @@ function Main({ navigation, state }) {
                             <Card.Title
                                 style={styles.fontCard}
                                 title={habit.title}
-                                subtitle={habit.description}
-                                right={() => <Caption> {GetWekDaysToShow(habit)} </Caption>} />
+                                subtitle={GetWekDaysToShow(habit)}
+                                right={() => <Caption>  </Caption>} />
                             <Card.Content>
                                 <ProgressBar progress={habit.progress} color="#fb685a" />
                             </Card.Content>

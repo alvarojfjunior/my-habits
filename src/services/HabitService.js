@@ -21,9 +21,11 @@ export default class HabitService {
                     goaldays,
                     currentday,
                     progress, 
-                    finished, 
+                    repeat,
+                    timetoremaind,
+                    notificationidentifier,
                     date)
-                values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                     [
                         habit.title,
                         habit.description,
@@ -37,7 +39,9 @@ export default class HabitService {
                         habit.goaldays,
                         habit.currentday,
                         habit.progress,
-                        habit.finished,
+                        habit.repeat,
+                        habit.timetoremaind,
+                        habit.notificationidentifier, 
                         habit.date],
                     (_, { insertId, rows }) => {
                         resolve(insertId)
@@ -77,8 +81,10 @@ export default class HabitService {
                 sunday = ?,
                 goaldays = ?,
                 currentday = ?,
-                progress = ?, 
-                finished = ?, 
+                progress = ?,
+                repeat = ?,
+                timetoremaind = ?, 
+                notificationidentifier = ?,
                 date = ? 
                 where id = ?;`, [
                     habit.title,
@@ -93,7 +99,9 @@ export default class HabitService {
                     habit.goaldays,
                     habit.currentday,
                     habit.progress,
-                    habit.finished,
+                    habit.repeat,
+                    habit.timetoremaind,
+                    habit.notificationidentifier,
                     habit.date,
                     habit.id
                 ], () => {

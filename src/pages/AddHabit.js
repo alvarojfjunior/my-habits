@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import Loading from '../components/Loading';
-import { YellowBox ,StyleSheet, View, Image, ScrollView } from 'react-native';
+import { YellowBox, LogBox, StyleSheet, View, Image, ScrollView } from 'react-native';
 import { IconButton, TextInput, Title, Button, Checkbox, Caption, Dialog, Text, RadioButton, Headline, Portal } from 'react-native-paper';
 import { connect } from 'react-redux';
-import { Notifications } from 'expo';
-import moment, { now } from 'moment';
+import * as Notifications from 'expo-notifications';
+import moment from 'moment';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import GoalService from '../services/GoalService';
@@ -13,7 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 YellowBox.ignoreWarnings([
     'Provided value for "time"'
-])
+]);
 
 function AddHabit({ navigation, route, state }) {
     const [isReady, setIsReady] = useState(false)
@@ -27,41 +27,46 @@ function AddHabit({ navigation, route, state }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
 
-    const [intersticialAdId, setIntersticialAdId] = useState('')
-    const [monday, setMonday] = useState(true);
-    const [tuesday, setTuesday] = useState(true);
-    const [wednesday, setWednesday] = useState(true);
-    const [thursday, setThursday] = useState(true);
-    const [friday, setFriday] = useState(true);
-    const [saturday, setSaturday] = useState(false);
-    const [sunday, setSunday] = useState(false);
+    const [monday, setMonday] = useState(1);
+    const [tuesday, setTuesday] = useState(1);
+    const [wednesday, setWednesday] = useState(1);
+    const [thursday, setThursday] = useState(1);
+    const [friday, setFriday] = useState(1);
+    const [saturday, setSaturday] = useState(0);
+    const [sunday, setSunday] = useState(0);
     const [goaldays, setGoaldays] = useState('0');
+    const [notificationIdentifier, setNotificationIdentifier] = useState('')
     const [timeToRemaind, setTimeToRemaind] = useState(new Date());
-    const [timeRepeat, setTimeRepeat] = useState('day')
 
+    const [repeat, setRepeat] = useState('day')
 
     useFocusEffect(
         useCallback(() => {
-            const newUser = state.user.user;
-            const newHabit = route.params;
-            setUser(newUser)
-
-            if (newHabit) {
-                setHabit(newHabit)
-                setTitle(newHabit.title)
-                setDescription(newHabit.description);
-                setMonday(newHabit.monday === '1' ? true : false)
-                setTuesday(newHabit.tuesday === '1' ? true : false)
-                setWednesday(newHabit.wednesday === '1' ? true : false)
-                setThursday(newHabit.thursday === '1' ? true : false)
-                setFriday(newHabit.friday === '1' ? true : false)
-                setSaturday(newHabit.saturday === '1' ? true : false)
-                setSunday(newHabit.sunday === '1' ? true : false)
-                setGoaldays('' + newHabit.goaldays + '')
-                setTimeRepeat(newHabit.timeRepeat)
-            }
-            setIsReady(true)
+            setScreen()
         }, []));
+
+
+    const setScreen = async () => {
+        const newUser = await state.user.user;
+        const newHabit = await route.params;
+        setUser(newUser)
+        if (newHabit) {
+            await setHabit(newHabit)
+            await setTitle(newHabit.title)
+            await setDescription(newHabit.description);
+            await setMonday(newHabit.monday)
+            await setTuesday(newHabit.tuesday)
+            await setWednesday(newHabit.wednesday)
+            await setThursday(newHabit.thursday)
+            await setFriday(newHabit.friday)
+            await setSaturday(newHabit.saturday)
+            await setSunday(newHabit.sunday)
+            await setGoaldays('' + newHabit.goaldays + '')
+            await setNotificationIdentifier(newHabit.notificationIdentifier)
+            await setRepeat(newHabit.repeat)
+        }
+        setIsReady(true)
+    }
 
     const addFirstGoal = async () => {
         const newFirstGoal = {
@@ -75,7 +80,6 @@ function AddHabit({ navigation, route, state }) {
         const resAddGoal = await HabitService.updateNewGoal(habit.id, habit.progress + 0.1);
         setFirstGoal({ ...newFirstGoal, 'id': resAddData })
     }
-
 
     const handleBtnSubmit = async () => {
         if (title === '' || description === '')
@@ -91,18 +95,19 @@ function AddHabit({ navigation, route, state }) {
             friday,
             saturday,
             sunday,
-            timeToRemaind,
-            timeRepeat,
-            'goaldays': parseInt(goaldays),
-            'currentday': 0,
-            'progress': 0,
-            'finished': false,
-            'date': moment().format('DD/MM/YYYY HH:MM'),
+            timetoremaind: moment(timeToRemaind).format('DD/MM/YYYY HH:MM'),
+            repeat,
+            goaldays: parseInt(goaldays),
+            currentday: 0,
+            notificationIdentifier,
+            progress: 0,
+            date: moment().format('DD/MM/YYYY HH:MM'),
         }
         //EDITING
         if (route.params) {
             newHabit = { 'id': route.params.id, ...newHabit };
             await HabitService.updateById(newHabit);
+            console.log(newHabit)
             navigation.push('DetailHabit', newHabit);
         }
         //NEW
@@ -111,31 +116,23 @@ function AddHabit({ navigation, route, state }) {
             setHabit({ 'id': res, ...newHabit })
             setModalVisible(true);
         }
-        await generateRemainders();
+        setNotificationIdentifier(await generateRemainders());
         setBtnAddIsLoading(false);
     }
 
     const generateRemainders = async () => {
-        await Notifications.cancelAllScheduledNotificationsAsync();
-        const schedulingOptions = {
-            time: timeToRemaind,
-            repeat: timeRepeat
-        }
-        const localNotification = {
-            title: 'done',
-            body: 'done!',
-            ios: {
-                sound: true,
-                _displayInForeground: true,
-                image: 'https://github.com/alvarojfjunior/MyHabits/raw/master/assets/icon.png',
+        const identifier = await Notifications.scheduleNotificationAsync({
+            content: {
+                title: `Daily remainder`,
+                body: `Le's to practice ${habit.title}`
             },
-            android: {
-                sound: true,
-                icon: 'https://github.com/alvarojfjunior/MyHabits/raw/master/assets/icon.png',
-                channelId: 'chat-messages',
-            },
-        };
-        Notifications.scheduleLocalNotificationAsync(localNotification, schedulingOptions);
+            trigger: {
+                hour: timeToRemaind.getHours(),
+                minute: timeToRemaind.getMinutes(),
+                repeats: true,
+            }
+        });
+        return identifier;
     }
 
     if (!isReady) return <Loading />
@@ -168,37 +165,37 @@ function AddHabit({ navigation, route, state }) {
                 <Caption style={styles.label}>What days of the week will you practice this habit?</Caption>
                 <View style={styles.checkboxContainer}>
                     <Checkbox.Item
-                        status={monday ? 'checked' : 'unchecked'}
+                        status={monday === 1 ? 'checked' : 'unchecked'}
                         label="Mon."
                         labelStyle={styles.checkbox}
                         onPress={() => setMonday(!monday)} />
                     <Checkbox.Item
-                        status={tuesday ? 'checked' : 'unchecked'}
+                        status={tuesday === 1 ? 'checked' : 'unchecked'}
                         label="Tue."
                         labelStyle={styles.checkbox}
                         onPress={() => setTuesday(!tuesday)} />
                     <Checkbox.Item
-                        status={wednesday ? 'checked' : 'unchecked'}
+                        status={wednesday === 1 ? 'checked' : 'unchecked'}
                         label="Wed."
                         labelStyle={styles.checkbox}
                         onPress={() => setWednesday(!wednesday)} />
                     <Checkbox.Item
-                        status={thursday ? 'checked' : 'unchecked'}
+                        status={thursday === 1 ? 'checked' : 'unchecked'}
                         label="Thu."
                         labelStyle={styles.checkbox}
                         onPress={() => setThursday(!thursday)} />
                     <Checkbox.Item
-                        status={friday ? 'checked' : 'unchecked'}
+                        status={friday === 1 ? 'checked' : 'unchecked'}
                         label="Fri."
                         labelStyle={styles.checkbox}
                         onPress={() => setFriday(!friday)} />
                     <Checkbox.Item
-                        status={saturday ? 'checked' : 'unchecked'}
+                        status={saturday === 1 ? 'checked' : 'unchecked'}
                         label="Sat."
                         labelStyle={styles.checkbox}
                         onPress={() => setSaturday(!saturday)} />
                     <Checkbox.Item
-                        status={sunday ? 'checked' : 'unchecked'}
+                        status={sunday === 1 ? 'checked' : 'unchecked'}
                         label="Sun."
                         labelStyle={styles.checkbox}
                         onPress={() => setSunday(!sunday)} />
@@ -241,7 +238,7 @@ function AddHabit({ navigation, route, state }) {
 
                 <Caption style={styles.label}>Repeat</Caption>
                 <View style={styles.boxGroup} >
-                    <RadioButton.Group onValueChange={timeRepeat => setTimeRepeat(timeRepeat)} value={timeRepeat}>
+                    <RadioButton.Group onValueChange={repeat => setRepeat(repeat)} value={repeat}>
                         <View>
                             <Text>minute</Text>
                             <RadioButton value="minute" />
@@ -256,7 +253,6 @@ function AddHabit({ navigation, route, state }) {
                         </View>
                     </RadioButton.Group>
                 </View>
-
                 <Button
                     mode="contained"
                     style={styles.btnAdd}
@@ -274,12 +270,12 @@ function AddHabit({ navigation, route, state }) {
                     }}>
                     <Dialog.Title style={styles.titleDialog}> Heaaah {user.name}! Congratulations! </Dialog.Title>
                     <Dialog.Content>
-                        <Headline style={styles.modalText}>We are going to be strong to accomplish your goal!</Headline>
-                        <Headline style={styles.modalText}>We will help you with daily notifications</Headline>
                         <Image
                             style={styles.image}
-                            source={require('../../assets/congrats.png')}
+                            source={require('../../assets/SoHappy.png')}
                         />
+                        <Headline style={styles.modalText}>We are going to be strong to accomplish your goal!</Headline>
+                        <Headline style={styles.modalText}>We will help you with daily notifications</Headline>
                     </Dialog.Content>
                 </Dialog>
             </Portal>
@@ -294,6 +290,8 @@ const styles = StyleSheet.create({
     },
     content: {
         margin: 15,
+        marginTop: 0,
+
     },
     title: {
         textAlign: 'center',
@@ -359,11 +357,11 @@ const styles = StyleSheet.create({
         fontSize: 25
     },
     image: {
-        width: 100,
-        height: 200,
+        width: 200,
+        height: 250,
         alignSelf: "center"
     }
 
-})
+});
 
 export default connect(state => ({ state }))(AddHabit);

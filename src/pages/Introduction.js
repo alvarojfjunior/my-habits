@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
-import { Text, Button, IconButton, Title } from 'react-native-paper';
+import { Button, IconButton, Title } from 'react-native-paper';
 import { connect } from 'react-redux';
 
 import Loading from '../components/Loading';
@@ -12,6 +12,7 @@ function Introduction({ navigation, state }) {
     const [user, setUser] = useState({})
 
     useEffect(() => {
+        setShowThis(true)
         console.log(navigation.canGoBack(false))
         if (showThis === false)
             navigation.push('Main')

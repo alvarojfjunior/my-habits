@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "804484035893",
+    "firebase_url": "https://myhabits-c70ad.firebaseio.com",
+    "project_id": "myhabits-c70ad",
+    "storage_bucket": "myhabits-c70ad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:804484035893:android:f0737e7f889a95477e887c",
+        "android_client_info": {
+          "package_name": "com.myhabits"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "804484035893-r2o9h972tmpl8b5buqben0srgt6juq80.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGi8LlaNk8RB5lJTv_L0Pdp1qXa4cLZEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "804484035893-r2o9h972tmpl8b5buqben0srgt6juq80.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

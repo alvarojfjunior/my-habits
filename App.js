@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { YellowBox, Vibration, StyleSheet, StatusBar, Platform } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
+
+import { StyleSheet, StatusBar, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import Routes from './src/routes';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
-import { Notifications } from 'expo';
-import * as Permissions from 'expo-permissions';
-import Constants from 'expo-constants';
 
 
 import store from './src/store';
@@ -32,40 +33,43 @@ const theme = {
 //AMARELO:  #f3c57b
 //CINZA:    #8aa0aa
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function App() {
-  const [bannerAdId, setBannerAdId] = useState('')
-
   const [isReady, setIsReady] = useState(false);
-  const [expoToken, setExpoToken] = useState('')
-  const [notification, setNotification] = useState('')
+  const [expoPushToken, setExpoPushToken] = useState('');
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
   useEffect(() => {
-    const initApp = async () => {
-      
-      //set Ads
-      await setAd()
-      
-      //set push-notifications
-      await getPushNotificationPermissions();
-      const _notificationSubscription = await Notifications.addListener(_handleNotification);
-     
-      //set database
-      new DatabaseInit();
-      setIsReady(true);
+    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    new DatabaseInit();
+    setIsReady(true);
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener);
+      Notifications.removeNotificationSubscription(responseListener);
     }
-    initApp();
   }, []);
 
-
-  const setAd = async () => {
-    
-
-
-  }
-
-
-  const getPushNotificationPermissions = async () => {
+  async function registerForPushNotificationsAsync() {
+    let token;
     if (Constants.isDevice) {
       const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
       let finalStatus = existingStatus;
@@ -77,25 +81,22 @@ export default function App() {
         alert('Failed to get push token for push notification!');
         return;
       }
-      const token = await Notifications.getExpoPushTokenAsync();
-      setExpoToken(token);
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      console.log(token);
     } else {
       alert('Must use physical device for Push Notifications');
     }
+
     if (Platform.OS === 'android') {
-      Notifications.createChannelAndroidAsync('chat-messages', {
-        name: 'Chat messages',
-        sound: true,
-        priority: 'max',
-        vibrate: [0, 250, 250, 250],
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
       });
     }
+    return token;
   }
-  const _handleNotification = notification => {
-    Vibration.vibrate();
-    setNotification(notification);
-  };
-
 
   if (!isReady) return (
     <Loading />

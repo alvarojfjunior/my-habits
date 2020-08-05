@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { StyleSheet, View, Image, ScrollView } from 'react-native';
 import { Card, Paragraph, Title, IconButton, Avatar, Caption, Portal, Dialog, Button } from 'react-native-paper';
 import { connect } from 'react-redux';
+import * as Notifications from 'expo-notifications';
 import { useFocusEffect } from '@react-navigation/native';
 
 import Loading from '../components/Loading';
@@ -19,18 +20,19 @@ function DetailHabit({ state, navigation, route }) {
 
     useFocusEffect(
         useCallback(() => {
-            const loadAll = async () => {
-                const newHabit = await {...route.params, 'initials': route.params.title.substring(0, 2)}
-                const newUser = await state.user.user 
-                setHabit(newHabit)
-                setUser(newUser);
-                //load Goals
-                const res = await GoalService.findByHabit(newHabit.id);
-                setGoals(res._array);
-                setIsReady(true);
-            }
             loadAll();
         }, []));
+
+    const loadAll = async () => {
+        const newHabit = await { ...route.params, 'initials': route.params.title.substring(0, 2) }
+        const newUser = await state.user.user
+        setHabit(newHabit)
+        setUser(newUser);
+        //load Goals
+        const res = await GoalService.findByHabit(newHabit.id);
+        setGoals(res._array);
+        setIsReady(true);
+    }
 
 
     const handleEdit = () => {
@@ -39,6 +41,7 @@ function DetailHabit({ state, navigation, route }) {
     }
 
     const handleDelete = async () => {
+        Notifications.cancelScheduledNotificationAsync(habit.notificationidentifier);
         const res = await HabitService.deleteById(habit.id);
         navigation.goBack();
     }
@@ -51,20 +54,20 @@ function DetailHabit({ state, navigation, route }) {
             res = res + habit.currentday + ' days of practice'
         else
             res = res + habit.currentday + ' to ' + habit.goaldays + ' days ( ';
-            
-        if (habit.monday)
+
+        if (habit.monday === 1)
             res = res + 'Mon. '
-        if (habit.tuesday)
+        if (habit.tuesday === 1)
             res = res + 'Tue. '
-        if (habit.wednesday)
+        if (habit.wednesday === 1)
             res = res + 'Wed. '
-        if (habit.thursday)
+        if (habit.thursday === 1)
             res = res + 'Thu. '
-        if (habit.friday)
+        if (habit.friday === 1)
             res = res + 'Fri. '
-        if (habit.saturday)
+        if (habit.saturday === 1)
             res = res + 'Sat. '
-        if (habit.sunday)
+        if (habit.sunday === 1)
             res = res + 'Sun. '
         return res + ')';
     }
@@ -77,7 +80,7 @@ function DetailHabit({ state, navigation, route }) {
                 icon="arrow-left"
                 color="#fb685a"
                 size={20}
-                onPress={() => navigation.goBack()}
+                onPress={() => navigation.navigate('Main')}
             />
             <Title style={styles.title}> All about you Habit! </Title>
             <Card style={styles.cardHabit}>
