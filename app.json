@@ -11,7 +11,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "notification": {
-      "icon": "./assets/icon.png"
+      "icon": "./assets/rocket.png"
     },
     "splash": {
       "image": "./assets/splash.png",
@@ -25,12 +25,18 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8648602875009663~3073503940"
+      }
     },
     "android": {
       "package": "com.myhabits",
       "useNextNotificationsApi": true,
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8648602875009663~6078763628"
+      }
     }
   }
 }

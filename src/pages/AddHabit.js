@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import * as Notifications from 'expo-notifications';
 import moment from 'moment';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { AdMobInterstitial } from 'expo-ads-admob';
 
 import GoalService from '../services/GoalService';
 import HabitService from '../services/HabitService';
@@ -17,6 +18,7 @@ YellowBox.ignoreWarnings([
 
 function AddHabit({ navigation, route, state }) {
     const [isReady, setIsReady] = useState(false)
+    const [intersticialAdUnitID, setIntersticialAdUnitID] = useState('');
     const [user, setUser] = useState({})
     const [habit, setHabit] = useState({})
     const [firstGoal, setFirstGoal] = useState({});
@@ -42,6 +44,8 @@ function AddHabit({ navigation, route, state }) {
 
     useFocusEffect(
         useCallback(() => {
+            setIntersticialAdUnitID(Platform.OS === 'android'? 'ca-app-pub-8648602875009663/1238512243' : 'ca-app-pub-8648602875009663/9055732019')
+
             setScreen()
         }, []));
 
@@ -85,6 +89,11 @@ function AddHabit({ navigation, route, state }) {
         if (title === '' || description === '')
             return;
         setBtnAddIsLoading(true)
+
+         // Display an interstitial
+        await AdMobInterstitial.setAdUnitID(intersticialAdUnitID);
+        await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true });
+        await AdMobInterstitial.showAdAsync();
         let newHabit = {
             title,
             description,

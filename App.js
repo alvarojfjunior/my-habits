@@ -7,6 +7,7 @@ import { StyleSheet, StatusBar, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import Routes from './src/routes';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { AdMobBanner } from 'expo-ads-admob';
 
 
 import store from './src/store';
@@ -45,10 +46,17 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState(false);
+  const [bannerAdUnitID, setBannerAdUnitID] = useState('');
   const notificationListener = useRef();
   const responseListener = useRef();
+   
+  Platform.OS === 'android'
 
-  useEffect(() => {
+  useEffect(() => {    
+    setBannerAdUnitID(Platform.OS === 'android'? 'ca-app-pub-8648602875009663/9438875398' : 'ca-app-pub-8648602875009663/1760422273')
+
+
+
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
@@ -106,6 +114,11 @@ export default function App() {
       <PaperProvider theme={theme} style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#8aa0aa" />
         <Routes />
+        <AdMobBanner
+          bannerSize="fullBanner"
+          adUnitID={bannerAdUnitID}
+          servePersonalizedAds 
+          onDidFailToReceiveAdWithError={this.bannerError}/>
       </PaperProvider>
     </Provider>
 
