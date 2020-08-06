@@ -144,6 +144,24 @@ export default class HabitService {
         }));
     }
 
+    static getCurrentDay(id) {
+        return new Promise((resolve, reject) => db.transaction(tx => {
+            if (!id)
+                resolve(0)
+            tx.executeSql(`select currentday from ${table} where id=?`, [id], (_, { rows }) => {
+                if (rows._array[0].currentday)
+                    resolve(rows._array[0].currentday)
+                else
+                    resolve(0)
+            }), (sqlError) => {
+                console.log(sqlError);
+            }
+        }, (txError) => {
+            console.log(txError);
+
+        }));
+    }
+
     static findAll() {
         return new Promise((resolve, reject) => db.transaction(tx => {
             tx.executeSql(`select * from ${table}`, [], (_, { rows }) => {

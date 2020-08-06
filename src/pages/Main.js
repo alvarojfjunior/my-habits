@@ -1,18 +1,19 @@
 import React, { useState, useCallback } from 'react';
-import { Card, ProgressBar, Title, Caption, FAB, Portal, Dialog, Paragraph, Avatar } from 'react-native-paper';
-import { StyleSheet, View, ScrollView, Image } from 'react-native';
+import { Card, ProgressBar, Title, Caption, FAB } from 'react-native-paper';
+import { StyleSheet, View, ScrollView, Image, BackHandler } from 'react-native';
 import { connect } from 'react-redux';
-import { Notifications } from 'expo';
+import * as Notifications from 'expo-notifications';
 import { useFocusEffect } from '@react-navigation/native';
 import moment from 'moment';
 
 import DatabaseReset from '../database/DatabaseReset';
 import DatabaseInit from '../database/DatabaseInit';
 
+import * as userActions from '../store/actions/user';
 import HabitService from '../services/HabitService';
 import Loading from '../components/Loading';
 
-function Main({ navigation, state }) {
+function Main({ navigation, state, dispatch }) {
 
     const [isReady, setIsReady] = useState(false)
     const [showNews, setShowNews] = useState(false)
@@ -37,12 +38,14 @@ function Main({ navigation, state }) {
 
     const databaseReset = async () => {
         try {
-            await Notifications.cancelAllScheduledNotificationsAsync();
-            await new DatabaseReset();
-            await new DatabaseInit();
-            navigation.navigate('SignUp');
+            await Notifications.removeAllNotificationListeners();
+            new DatabaseReset();
+            new DatabaseInit();
+            dispatch(userActions.setUser(null));
+            navigation.navigate('SignUp', habit)
+            //BackHandler.exitApp();
         } catch (error) {
-            error
+            console.log(error);
         }
     }
 

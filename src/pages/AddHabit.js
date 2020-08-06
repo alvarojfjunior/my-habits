@@ -5,8 +5,8 @@ import { IconButton, TextInput, Title, Button, Checkbox, Caption, Dialog, Text, 
 import { connect } from 'react-redux';
 import * as Notifications from 'expo-notifications';
 import moment from 'moment';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { AdMobInterstitial } from 'expo-ads-admob';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { AdMobInterstitial, setTestDeviceIDAsync } from 'expo-ads-admob';
 
 import GoalService from '../services/GoalService';
 import HabitService from '../services/HabitService';
@@ -27,7 +27,7 @@ function AddHabit({ navigation, route, state }) {
     const [description, setDescription] = useState('');
 
     const [modalVisible, setModalVisible] = useState(false);
-    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
     const [monday, setMonday] = useState(1);
     const [tuesday, setTuesday] = useState(1);
@@ -44,7 +44,7 @@ function AddHabit({ navigation, route, state }) {
 
     useFocusEffect(
         useCallback(() => {
-            setIntersticialAdUnitID(Platform.OS === 'android'? 'ca-app-pub-8648602875009663/1238512243' : 'ca-app-pub-8648602875009663/9055732019')
+            setIntersticialAdUnitID(Platform.OS === 'android' ? 'ca-app-pub-8648602875009663/1238512243' : 'ca-app-pub-8648602875009663/9055732019')
 
             setScreen()
         }, []));
@@ -90,10 +90,11 @@ function AddHabit({ navigation, route, state }) {
             return;
         setBtnAddIsLoading(true)
 
-         // Display an interstitial
+        // Display an interstitial
         await AdMobInterstitial.setAdUnitID(intersticialAdUnitID);
         await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true });
         await AdMobInterstitial.showAdAsync();
+
         let newHabit = {
             title,
             description,
@@ -104,19 +105,18 @@ function AddHabit({ navigation, route, state }) {
             friday,
             saturday,
             sunday,
+            currentday: await HabitService.getCurrentDay(route.params.id),
             timetoremaind: moment(timeToRemaind).format('DD/MM/YYYY HH:MM'),
             repeat,
             goaldays: parseInt(goaldays),
-            currentday: 0,
             notificationIdentifier,
-            progress: 0,
             date: moment().format('DD/MM/YYYY HH:MM'),
         }
         //EDITING
         if (route.params) {
-            newHabit = { 'id': route.params.id, ...newHabit };
+            newHabit = { 
+                id: route.params.id, ...newHabit };
             await HabitService.updateById(newHabit);
-            console.log(newHabit)
             navigation.push('DetailHabit', newHabit);
         }
         //NEW
@@ -227,41 +227,23 @@ function AddHabit({ navigation, route, state }) {
                     </RadioButton.Group>
                 </View>
                 <View >
-                    <Button mode="contained" onPress={() => setShowTimePicker(true)}>
+                    <Button mode="contained" onPress={() => setDatePickerVisibility(true)}>
                         Set a time to reminders
                     </Button>
-                </View>
-                {showTimePicker ? (
-                    <DateTimePicker
-                        value={timeToRemaind}
+                    
+                    <DateTimePickerModal
+                        date={timeToRemaind}
+                        isVisible={isDatePickerVisible}
                         mode="time"
-                        is24Hour={true}
-                        style={styles.timePiker}
-                        onChange={(event, selectedDate) => {
-                            const currentDate = selectedDate || date;
-                            setShowTimePicker(Platform.OS === 'ios');
-                            setTimeToRemaind(currentDate)
+                        locale="en_GB"
+                        onConfirm={(date) => {
+                            setDatePickerVisibility(false)
+                            setTimeToRemaind(date)
                         }}
-                    />
-                ) : <View></View>}
-
-                <Caption style={styles.label}>Repeat</Caption>
-                <View style={styles.boxGroup} >
-                    <RadioButton.Group onValueChange={repeat => setRepeat(repeat)} value={repeat}>
-                        <View>
-                            <Text>minute</Text>
-                            <RadioButton value="minute" />
-                        </View>
-                        <View>
-                            <Text>Hour</Text>
-                            <RadioButton value="hour" />
-                        </View>
-                        <View>
-                            <Text>Day</Text>
-                            <RadioButton value="day" />
-                        </View>
-                    </RadioButton.Group>
+                        onHide={() => setDatePickerVisibility(false)}
+                        onCancel={() => { setDatePickerVisibility(false) }} />
                 </View>
+
                 <Button
                     mode="contained"
                     style={styles.btnAdd}
@@ -274,6 +256,7 @@ function AddHabit({ navigation, route, state }) {
                 <Dialog
                     visible={modalVisible}
                     onDismiss={async () => {
+                        setModalVisible(false);
                         await addFirstGoal();
                         navigation.navigate('Main');
                     }}>
@@ -312,9 +295,6 @@ const styles = StyleSheet.create({
     textFields: {
         marginBottom: 10,
         borderRadius: 10,
-    },
-    timePiker: {
-        color: '#f3c57b'
     },
     btnAdd: {
         marginTop: 15,

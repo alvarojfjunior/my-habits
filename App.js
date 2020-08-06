@@ -15,6 +15,7 @@ import DatabaseInit from './src/database/DatabaseInit';
 
 import Loading from './src/components/Loading';
 
+
 const theme = {
   ...DefaultTheme,
   colors: {
@@ -26,7 +27,6 @@ const theme = {
     text: '#e8e4ce',
   },
 };
-
 
 // CORES //
 //CREME:    #f4f0d9   #e8e4ce
@@ -50,12 +50,8 @@ export default function App() {
   const notificationListener = useRef();
   const responseListener = useRef();
    
-  Platform.OS === 'android'
-
-  useEffect(() => {    
-    setBannerAdUnitID(Platform.OS === 'android'? 'ca-app-pub-8648602875009663/9438875398' : 'ca-app-pub-8648602875009663/1760422273')
-
-
+  useEffect(() => {      
+    setBannerAdUnitID(Platform.OS === 'android' ? 'ca-app-pub-8648602875009663/9438875398' : 'ca-app-pub-8648602875009663/1760422273')
 
     registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
@@ -69,6 +65,7 @@ export default function App() {
 
     new DatabaseInit();
     setIsReady(true);
+    
 
     return () => {
       Notifications.removeNotificationSubscription(notificationListener);
@@ -103,6 +100,7 @@ export default function App() {
         lightColor: '#FF231F7C',
       });
     }
+
     return token;
   }
 
@@ -117,8 +115,9 @@ export default function App() {
         <AdMobBanner
           bannerSize="fullBanner"
           adUnitID={bannerAdUnitID}
+          setTes
           servePersonalizedAds 
-          onDidFailToReceiveAdWithError={this.bannerError}/>
+          onDidFailToReceiveAdWithError={(bannerError)=> console.log(bannerError)}/>
       </PaperProvider>
     </Provider>
 
